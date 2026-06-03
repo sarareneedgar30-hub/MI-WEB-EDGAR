@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskFlow</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f172a,#1e293b,#0f172a);
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:700px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:25px;
+    padding:30px;
+    box-shadow:0 10px 40px rgba(0,0,0,.4);
+}
+
+h1{
+    text-align:center;
+    color:#38bdf8;
+    margin-bottom:20px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#94a3b8;
+    margin-bottom:25px;
+}
+
+.input-area{
+    display:flex;
+    gap:10px;
+}
+
+input{
+    flex:1;
+    padding:15px;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    background:#1e293b;
+    color:white;
+    font-size:16px;
+}
+
+button{
+    border:none;
+    border-radius:12px;
+    padding:15px 25px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.add-btn{
+    background:#38bdf8;
+    color:white;
+}
+
+.add-btn:hover{
+    transform:translateY(-2px);
+}
+
+.stats{
+    margin:20px 0;
+    display:flex;
+    justify-content:space-between;
+    color:#cbd5e1;
+}
+
+ul{
+    list-style:none;
+}
+
+li{
+    background:#1e293b;
+    margin:10px 0;
+    padding:15px;
+    border-radius:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:white;
+    animation:fadeIn .3s;
+}
+
+.completed{
+    text-decoration:line-through;
+    opacity:.6;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+}
+
+.done{
+    background:#22c55e;
+    color:white;
+}
+
+.delete{
+    background:#ef4444;
+    color:white;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>🚀 TaskFlow</h1>
+    <p class="subtitle">Organiza tus actividades fácilmente</p>
+
+    <div class="input-area">
+        <input type="text" id="taskInput" placeholder="Escribe una tarea...">
+        <button class="add-btn" onclick="addTask()">Agregar</button>
+    </div>
+
+    <div class="stats">
+        <span>Total: <b id="total">0</b></span>
+        <span>Completadas: <b id="completed">0</b></span>
+    </div>
+
+    <ul id="taskList"></ul>
+
+</div>
+
+<script>
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function saveTasks(){
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function updateStats(){
+
+    document.getElementById("total").textContent =
+    tasks.length;
+
+    document.getElementById("completed").textContent =
+    tasks.filter(t => t.done).length;
+}
+
+function renderTasks(){
+
+    const list =
+    document.getElementById("taskList");
+
+    list.innerHTML = "";
+
+    tasks.forEach((task,index)=>{
+
+        const li =
+        document.createElement("li");
+
+        if(task.done)
+            li.classList.add("completed");
+
+        li.innerHTML = `
+            <span>${task.text}</span>
+
+            <div class="actions">
+
+                <button class="done"
+                onclick="toggleTask(${index})">
+                ✓
+                </button>
+
+                <button class="delete"
+                onclick="deleteTask(${index})">
+                ✕
+                </button>
+
+            </div>
+        `;
+
+        list.appendChild(li);
+
+    });
+
+    updateStats();
+    saveTasks();
+}
+
+function addTask(){
+
+    const input =
+    document.getElementById("taskInput");
+
+    const text = input.value.trim();
+
+    if(text === "") return;
+
+    tasks.push({
+        text:text,
+        done:false
+    });
+
+    input.value = "";
+
+    renderTasks();
+}
+
+function toggleTask(index){
+
+    tasks[index].done =
+    !tasks[index].done;
+
+    renderTasks();
+}
+
+function deleteTask(index){
+
+    tasks.splice(index,1);
+
+    renderTasks();
+}
+
+document
+.getElementById("taskInput")
+.addEventListener("keypress",function(e){
+
+    if(e.key==="Enter"){
+        addTask();
+    }
+
+});
+
+renderTasks();
+
+</script>
+
+</body>
+</html>
